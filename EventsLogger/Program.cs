@@ -6,7 +6,7 @@ namespace EventsLogger
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Running Logger!");
+            Console.WriteLine("Logger Started!");
 
             var eventsLogger = new EventsLogger();
             eventsLogger.Run();

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Infrastructure
 {
     [Serializable]
-    public class SimilarityValues
+    public struct SimilarityValues
     {
         public string Id { get; set; }
         public double Similarity { get; set; }

@@ -18,7 +18,7 @@ namespace Valuator.Pages
     {
         private readonly IStorage _storage;
 
-        public IndexModel( IStorage storage)
+        public IndexModel(IStorage storage)
         {
             _storage = storage;
         }
@@ -28,18 +28,24 @@ namespace Valuator.Pages
 
         }
 
-        public async Task<IActionResult> OnPostAsync(string text)
+        public async Task<IActionResult> OnPostAsync(string text, string sKey)
         {
+            if (string.IsNullOrEmpty(text))
+            {
+                return Redirect("/");
+            }
+
             string id = Guid.NewGuid().ToString();
 
-            string similarityKey = Constants.SimilarityKey + id; //реорганизация принципа подсчета 
+            string similarityKey = Constants.SimilarityKey + id; //реорганизация принципа подсчета  
             double similarity = GetSimilarity(text);
 
-            _storage.Store(similarityKey, similarity.ToString()); //преобразуем для корректного отображения
+            _storage.StoreSKey(id, sKey);
 
             string textKey = Constants.TextKey + id;
-            _storage.Store(textKey, text);
-            _storage.Load(textKey);
+            _storage.Store(sKey, similarityKey, similarity.ToString());
+            _storage.Store(sKey, textKey, text);
+            _storage.StoreValue(Constants.TextKey, sKey, text);
 
             await TaskCalculatingRank(id);
 
@@ -63,15 +69,19 @@ namespace Valuator.Pages
                 connection.Close();
             }
         }
+
         double GetSimilarity(string text)
         {
-            var similarity = _storage.TextSignes("TEXT-", text);
-            if (similarity)
+            if (_storage.CheckingValue(Constants.TextKey, Constants.RusId, text) ||
+                _storage.CheckingValue(Constants.TextKey, Constants.EUId, text) ||
+                _storage.CheckingValue(Constants.TextKey, Constants.OtherId, text))
             {
                 return 1;
             }
-
-            return 0;
+            else
+            {
+                return 0;
+            }
         }
 
         private async Task TaskSendingSimilarity(SimilarityValues sendSimilarity)

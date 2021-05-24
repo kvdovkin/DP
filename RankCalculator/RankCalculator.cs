@@ -15,23 +15,26 @@ namespace RankCalculator
     {
         private readonly IConnection _connection;
         private readonly IAsyncSubscription _asyncSubscription;
+        private readonly IStorage _storage;
 
         public RankCalculator(IStorage storage)
         {
             ConnectionFactory cf = new ConnectionFactory();
             _connection = cf.CreateConnection();
+            _storage = storage;
 
-            _asyncSubscription = _connection.SubscribeAsync(Constants.RankCalculate, "rank_calculator", async (sender, args)
+            _asyncSubscription = _connection.SubscribeAsync(Constants.RankCalculate, Constants.RankValue, async (sender, args)
                 =>
             {
                 string key = Encoding.UTF8.GetString(args.Message.Data);
 
                 string textKey = Constants.TextKey + key;
-                string text = storage.Load(textKey);
+                string sKey = storage.GetSKey(key);
+                string text = storage.Load(sKey, textKey);
 
                 string rankKey = Constants.RankKey + key;
                 double rank = GetRank(text);
-                storage.Store(rankKey, rank.ToString());
+                storage.Store(sKey, rankKey, rank.ToString());
 
                 RankValues rankValues = new RankValues(key, rank);
                 await GetRankInfoToLogger(rankValues);

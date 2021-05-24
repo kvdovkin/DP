@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Infrastructure
 {
     [Serializable]
-    public class RankValues
+    public struct RankValues
     {
         public string Id { get; set; }
         public double Rank { get; set; }

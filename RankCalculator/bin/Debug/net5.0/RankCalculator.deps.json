@@ -9,6 +9,7 @@
       "RankCalculator/1.0.0": {
         "dependencies": {
           "NATS.Client": "0.12.0",
+          "StackExchange.Redis": "2.2.4",
           "Valuator": "1.0.0"
         },
         "runtime": {

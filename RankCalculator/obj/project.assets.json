@@ -5614,6 +5614,7 @@
   "projectFileDependencyGroups": {
     "net5.0": [
       "NATS.Client >= 0.12.0",
+      "StackExchange.Redis >= 2.2.4",
       "Valuator >= 1.0.0"
     ]
   },
@@ -5670,6 +5671,10 @@
           "NATS.Client": {
             "target": "Package",
             "version": "[0.12.0, )"
+          },
+          "StackExchange.Redis": {
+            "target": "Package",
+            "version": "[2.2.4, )"
           }
         },
         "imports": [
