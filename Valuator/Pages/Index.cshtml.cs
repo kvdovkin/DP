@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Infrastructure;
+using Infrastructure.Storage;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
@@ -38,8 +41,11 @@ namespace Valuator.Pages
             _storage.Store(textKey, text);
             _storage.Load(textKey);
 
-            CancellationTokenSource cts = new CancellationTokenSource();
             await TaskCalculatingRank(id);
+
+            SimilarityValues sendSimilarity = new SimilarityValues(id, similarity);
+
+            await TaskSendingSimilarity(sendSimilarity);
 
             return Redirect($"summary?id={id}");
         }
@@ -49,9 +55,9 @@ namespace Valuator.Pages
             ConnectionFactory cf = new ConnectionFactory();
             using (IConnection connection = cf.CreateConnection())
             {
-                byte[] data = Encoding.UTF8.GetBytes(id);
-                connection.Publish("valuator.processing.rank", data);
-                await Task.Delay(1000);
+                byte[] rank = Encoding.UTF8.GetBytes(id);
+                connection.Publish(Constants.RankCalculate, rank);
+                await Task.Delay(100);
 
                 connection.Drain();
                 connection.Close();
@@ -66,6 +72,21 @@ namespace Valuator.Pages
             }
 
             return 0;
+        }
+
+        private async Task TaskSendingSimilarity(SimilarityValues sendSimilarity)
+        {
+            ConnectionFactory cf = new ConnectionFactory();
+            using (IConnection connection = cf.CreateConnection())
+            {
+                var similarity = JsonSerializer.Serialize(sendSimilarity);
+
+                connection.Publish(Constants.SimilarityAssignment, Encoding.UTF8.GetBytes(similarity));
+                await Task.Delay(100);
+
+                connection.Drain();
+                connection.Close();
+            }
         }
     }
 }

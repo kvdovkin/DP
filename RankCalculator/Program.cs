@@ -1,4 +1,5 @@
 ﻿using System;
+using Infrastructure.Storage;
 using Valuator;
 
 namespace RankCalculator

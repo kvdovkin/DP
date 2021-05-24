@@ -1569,12 +1569,25 @@
           "lib/netstandard1.3/System.Xml.XDocument.dll": {}
         }
       },
+      "Infrastructure/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v5.0",
+        "dependencies": {
+          "StackExchange.Redis": "2.2.4"
+        },
+        "compile": {
+          "bin/placeholder/Infrastructure.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Infrastructure.dll": {}
+        }
+      },
       "Valuator/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v5.0",
         "dependencies": {
-          "NATS.Client": "0.12.0",
-          "StackExchange.Redis": "2.2.4"
+          "Infrastructure": "1.0.0",
+          "NATS.Client": "0.12.0"
         },
         "compile": {
           "bin/placeholder/Valuator.dll": {}
@@ -5586,6 +5599,11 @@
         "system.xml.xdocument.4.3.0.nupkg.sha512",
         "system.xml.xdocument.nuspec"
       ]
+    },
+    "Infrastructure/1.0.0": {
+      "type": "project",
+      "path": "../Infrastructure/Infrastructure/Infrastructure.csproj",
+      "msbuildProject": "../Infrastructure/Infrastructure/Infrastructure.csproj"
     },
     "Valuator/1.0.0": {
       "type": "project",

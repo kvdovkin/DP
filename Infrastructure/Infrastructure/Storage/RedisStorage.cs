@@ -1,11 +1,13 @@
-using Microsoft.Extensions.Logging;
-using StackExchange.Redis;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using StackExchange.Redis;
 
-namespace Valuator
+namespace Infrastructure.Storage
 {
-    public class RedisStorage: IStorage
+    public class RedisStorage : IStorage
     {
         private readonly IConnectionMultiplexer _connectionMultiplexer = ConnectionMultiplexer.Connect("localhost, allowAdmin=true");
 
@@ -35,7 +37,7 @@ namespace Valuator
 
         public bool CheckingKey(string key)
         {
-            IDatabase db = _connectionMultiplexer.GetDatabase();       
+            IDatabase db = _connectionMultiplexer.GetDatabase();
             return db.KeyExists(key);
         }
     }
