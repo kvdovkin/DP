@@ -24,7 +24,7 @@ namespace Valuator
             IDatabase db = _connectionMultiplexer.GetDatabase();
             var _server = _connectionMultiplexer.GetServer("localhost", 6379);
             var keys = _server.Keys(pattern: "*" + prefix + "*");
-            return keys.Select(x => Load(x)).Where(x => x == text).Count() > 0;
+            return keys.Select(x => Load(x)).Where(x => x == text).Any();
         }
 
         public string Load(string key)
@@ -33,6 +33,10 @@ namespace Valuator
             return db.StringGet(key);
         }
 
-
+        public bool CheckingKey(string key)
+        {
+            IDatabase db = _connectionMultiplexer.GetDatabase();       
+            return db.KeyExists(key);
+        }
     }
 }

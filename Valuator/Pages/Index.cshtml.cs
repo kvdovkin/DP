@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using NATS.Client;
 
 namespace Valuator.Pages
 {
@@ -22,31 +25,37 @@ namespace Valuator.Pages
 
         }
 
-        public IActionResult OnPost(string text)
+        public async Task<IActionResult> OnPostAsync(string text)
         {
             string id = Guid.NewGuid().ToString();
 
-            string rankKey = "RANK-" + id;
-            string rank = GetRank(text).ToString();
-
-            _storage.Store(rankKey, rank);
-
-            string similarityKey = "SIMILARITY-" + id; //реорганизация принципа подсчета 
+            string similarityKey = Constants.SimilarityKey + id; //реорганизация принципа подсчета 
             double similarity = GetSimilarity(text);
 
             _storage.Store(similarityKey, similarity.ToString()); //преобразуем для корректного отображения
 
-            string textKey = "TEXT-" + id;
+            string textKey = Constants.TextKey + id;
             _storage.Store(textKey, text);
             _storage.Load(textKey);
 
+            CancellationTokenSource cts = new CancellationTokenSource();
+            await TaskCalculatingRank(id);
+
             return Redirect($"summary?id={id}");
         }
-        double GetRank(string text) 
-        {
-            int lettersCount = text.Count(char.IsLetter);
 
-            return Math.Round(((text.Length - lettersCount) / (double)text.Length), 3);
+        private async Task TaskCalculatingRank(string id)
+        {
+            ConnectionFactory cf = new ConnectionFactory();
+            using (IConnection connection = cf.CreateConnection())
+            {
+                byte[] data = Encoding.UTF8.GetBytes(id);
+                connection.Publish("valuator.processing.rank", data);
+                await Task.Delay(1000);
+
+                connection.Drain();
+                connection.Close();
+            }
         }
         double GetSimilarity(string text)
         {
