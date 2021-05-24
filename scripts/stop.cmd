@@ -1,2 +1,4 @@
-taskkill /f /IM valuator.exe
-taskkill /f /IM nginx.exe
+taskkill /f /im valuator.exe 
+
+cd ..\..\
+nginx -s stop
