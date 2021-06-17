@@ -53,7 +53,8 @@ namespace Chain
                 NextPort = Int32.Parse(args[2])
             };
 
-            CheckingInitiation = (args.Length == 4 && args[3] == flagIn) ? CheckingInitiation = true : CheckingInitiation = false;
+            if (args.Length == 4 && args[3] == flagIn)
+                CheckingInitiation = true;
 
             return parametrs;
         }
@@ -84,9 +85,23 @@ namespace Chain
             CreateSocketConnection(remoteEP);
         }
 
-        private static void CreateSocketConnection(IPEndPoint remoteEP) => _start = _sender.BeginConnect(remoteEP, null, null);
+        private static void CreateSocketConnection(IPEndPoint remoteEP)
+        {
+            _start = _sender.BeginConnect(remoteEP, null, null);
 
-        private static void Initiator()
+            bool success = _start.AsyncWaitHandle.WaitOne(7000, true);
+            if (success)
+            {
+                _sender.EndConnect(_start);
+            }
+            else
+            {
+                _sender.Close();
+                throw new SocketException(10060);
+            }
+        }
+
+        private static void Initiator() 
         {
             string initString = Console.ReadLine();
 
@@ -98,7 +113,7 @@ namespace Chain
             _sender.Send(Encoding.UTF8.GetBytes(initString));
 
             Socket handler = _listener.Accept();
-            byte[] value = new byte[4];
+            byte[] value = new byte[sizeof(int)];
             handler.Receive(value);
 
             string recievedString = Encoding.UTF8.GetString(value);
@@ -121,7 +136,7 @@ namespace Chain
             }
 
             Socket handler = _listener.Accept();
-            byte[] value = new byte[4];
+            byte[] value = new byte[sizeof(int)];
             handler.Receive(value);
 
             string recievedString = Encoding.UTF8.GetString(value);
