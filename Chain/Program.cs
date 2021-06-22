@@ -37,6 +37,7 @@ namespace Chain
             {
                 Console.WriteLine(e.Message);
             }
+            System.Console.ReadLine();
         }
 
         private static Params FindArgsFromParams(string[] args)
@@ -110,17 +111,20 @@ namespace Chain
                 throw new Exception(Constants.Exception);
             }
 
-            _sender.Send(Encoding.UTF8.GetBytes(initString));
+            int initNumber = Convert.ToInt32(initString);
+            byte[] numberAsBytes = BitConverter.GetBytes(initNumber);
+
+            _sender.Send(numberAsBytes);
 
             Socket handler = _listener.Accept();
             byte[] value = new byte[sizeof(int)];
             handler.Receive(value);
 
-            string recievedString = Encoding.UTF8.GetString(value);
+            int recievedInt = BitConverter.ToInt32(value);
 
-            _sender.Send(Encoding.UTF8.GetBytes(recievedString));
+            _sender.Send(BitConverter.GetBytes(recievedInt));
 
-            Console.WriteLine(recievedString);
+            Console.WriteLine(recievedInt);
 
             handler.Shutdown(SocketShutdown.Both);
             handler.Close();
@@ -135,20 +139,17 @@ namespace Chain
                 throw new Exception(Constants.Exception);
             }
 
+            int normNumber = Convert.ToInt32(normString);
+
             Socket handler = _listener.Accept();
             byte[] value = new byte[sizeof(int)];
             handler.Receive(value);
 
-            string recievedString = Encoding.UTF8.GetString(value);
+            int recievedInt = BitConverter.ToInt32(value);
 
-            _sender.Send(Encoding.UTF8.GetBytes(Math.Max
-                (Convert.ToInt32(normString), Convert.ToInt32(recievedString)).ToString()));
+            _sender.Send(BitConverter.GetBytes(Math.Max(recievedInt, normNumber)));
 
-            handler.Receive(value);
-
-            _sender.Send(value);
-
-            Console.WriteLine(Encoding.UTF8.GetString(value));
+            Console.WriteLine(recievedInt);
 
             handler.Shutdown(SocketShutdown.Both);
             handler.Close();
